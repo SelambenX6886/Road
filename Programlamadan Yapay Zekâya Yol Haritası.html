@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Programlamadan Yapay Zekâya Yol Haritası</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--bg:#f6f5f1;--sf:#ffffff;--sf2:#eeece6;--tx:#171717;--mu:#6b6862;--ln:#dcd9d1;--ac:#171717;--on:#f6f5f1;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121211;--sf:#1b1b19;--sf2:#262624;--tx:#efede8;--mu:#a09d95;--ln:#34332f;--ac:#efede8;--on:#121211;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121211;--sf:#1b1b19;--sf2:#262624;--tx:#efede8;--mu:#a09d95;--ln:#34332f;--ac:#efede8;--on:#121211;color-scheme:dark}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{background:var(--bg);color:var(--tx);font-family:Inter,system-ui,sans-serif;margin:0}
+.fd{font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:-.01em}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:16px}
+.chip{display:inline-block;font-size:.78rem;padding:.22rem .65rem;border-radius:999px;background:var(--sf2);margin:0 .3rem .4rem 0}
+.mu{color:var(--mu)}
+#tl{position:relative;padding-left:56px}
+#tl::before{content:"";position:absolute;left:19px;top:0;bottom:0;width:2px;background:var(--ln)}
+#fill{position:absolute;left:19px;top:0;width:2px;height:0;background:var(--ac)}
+.item{position:relative;margin-bottom:24px}
+.dot{position:absolute;left:-56px;top:18px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:.9rem;background:var(--bg);border:2px solid var(--ln);color:var(--mu);transition:.5s}
+.act .dot{border-color:var(--ac);background:var(--ac);color:var(--on)}
+.part{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);margin:34px 0 14px}
+.do{background:var(--sf2);border-radius:10px;padding:.7rem .9rem;font-size:.9rem}
+#bar{position:fixed;top:0;left:0;height:2px;width:0;background:var(--ac);z-index:60}
+header{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--ln)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:55}
+.btn{background:var(--ac);color:var(--on);font-weight:500;border-radius:10px;padding:.5rem .95rem;font-size:.88rem;transition:.2s}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn[disabled]{opacity:.5;cursor:wait}
+a.res{display:block;transition:.25s}a.res:hover{transform:translateY(-3px);border-color:var(--ac)}
+/* PDF modu */
+body.pdf{--bg:#fff;--sf:#fff;--sf2:#f0eee8;--tx:#171717;--mu:#6b6862;--ln:#dcd9d1;--ac:#171717;--on:#fff;color-scheme:light}
+.pdf header,.pdf #bar,.pdf .nopdf{display:none!important}
+.pdf *{transition:none!important;animation:none!important;backdrop-filter:none!important}
+.pdf .rv{opacity:1!important;transform:none!important}
+.pdf #doc{width:780px;max-width:780px;margin:0;padding:0}
+.pdf #tl{padding-left:0}.pdf #tl::before,.pdf #fill{display:none}
+.pdf .item{padding-left:56px;margin:0;padding-bottom:16px}
+.pdf .dot{left:0;border-color:var(--ac);background:var(--ac);color:#fff}
+.pdf .hero{padding-top:20px}
+@media(prefers-reduced-motion:reduce){.rv{transition:none}}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<header>
+ <div class="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
+  <span class="fd text-lg">Yol Haritası</span>
+  <nav class="hidden md:flex gap-6 text-sm mu"><a href="#path">Adımlar</a><a href="#kaynak">Kaynaklar</a><a href="#yontem">Yöntem</a></nav>
+  <button id="pdfBtn" class="btn">PDF olarak indir &darr;</button>
+ </div>
+</header>
+
+<main id="doc" class="max-w-4xl mx-auto px-4">
+ <section class="hero pt-32 pb-14" data-pdf>
+  <p class="text-sm mu tracking-widest uppercase">Öğrenme yol haritası</p>
+  <h1 class="fd text-4xl md:text-6xl mt-3 leading-tight">Programlamanın temelinden<br>web sitelerine, oradan<br>yapay zekâya.</h1>
+  <p class="mt-6 max-w-xl mu">Bilgin sıfır değil ama ben yine de sana sıfırmışsın gibi anlatıyorum say: önce programlama, sonra frontend ve backend ile web sitesi yapmak, ardından yapay zekâ. 4 bölüm, 13 adım. Ki bu adımlara ayırmak çok tercihim değil ama öyle ikonik dursun diye.</p>
+ </section>
+
+ <section id="path" class="py-6">
+  <h2 class="fd text-3xl mb-2" data-pdf>Adımlar</h2>
+  <div id="tl"><div id="fill"></div></div>
+ </section>
+
+ <section id="kaynak" class="py-12">
+  <h2 class="fd text-3xl mb-6" data-pdf>Kaynaklar</h2>
+  <div id="res" class="grid sm:grid-cols-2 gap-3" data-pdf></div>
+ </section>
+
+ <section id="yontem" class="py-12">
+  <h2 class="fd text-3xl mb-6" data-pdf>Çalışma yöntemi</h2>
+  <ul class="card p-6 space-y-3 rv" data-pdf>
+   <li>1. Konuları öğrenebileceğin kaynaklar verdim sana. Ve tabii ki yapay zeka da senin en iyi koçun olur bu yolda. Ona da bir şeyler sor hatta öğretmeninmiş gibi ayarla. </li>
+   <li>2. Öğrendiğin konuları kendi başına yap. Yapamadığın kısımda araştır ama en son yapay zekaya sor.</li>
+   <li>3. Github vs kesinlikle kullan. Başta bu basic uygulamalar falan geliştir ben örnek bir şeyler yazdım sana. Sen illa bunları yapmak zorunda değilsin. İstediğin bir şeyleri de geliştirebilirsin AMA sakın şu tuzağa düşme: İşte büyük bir proje yapayım onun üzerinden öğreneyim falan. Bu mantıklı bir yandan ama tuzağı şu ki bitmediği için ortada bir tatmin duygusu olmayabilir ve bu seni fark etmeden sıkabilir.</li>
+   <li>4. İngilizcen yoksa bir yandan İngilizce de öğren kanka her türlü işine yarar bu zaten. </li>
+   <li>5. Yani burada adım adım anlattım da adımlara takılma. Öyle birkaç uyarı gibi anlattım. </li>
+  </ul>
+ </section>
+</main>
+
+<script>
+const S=[
+"Bölüm 1 · Programlamanın temeli",
+["Bilgisayar ve çalışma ortamı",["Dosya ve klasör yapısı","Terminal temelleri (cd, ls, mkdir)","VS Code kurulumu","İnternet nasıl çalışır: istemci, sunucu, HTTP, DNS","GitHub hesabı açmak"],"VS Code'u kur, terminalden klasör oluştur, ilk dosyanı GitHub'a yükle."],
+["Python ile programlamaya giriş",["Değişkenler ve veri tipleri","Koşullar ve döngüler","Fonksiyonlar","Liste, sözlük, küme","Dosya okuma ve yazma","Hata ayıklama"],"Sayı tahmin oyunu, hesap makinesi ve kelime sayacı yaz."],
+["Problem çözme ve nesne yönelimli programlama",["Algoritma mantığı","Yığın, kuyruk, ağaç gibi veri yapıları","Özyineleme","Arama ve sıralama","Sınıf ve nesne (OOP)","Git ile sürüm kontrolü"],"Adam asmaca oyunu ve sınıflarla çalışan bir kütüphane programı yaz."],
+"Bölüm 2 · Frontend (sitenin görünen yüzü)",
+["HTML, CSS ve JavaScript",["HTML etiketleri ve yapısı","CSS: flexbox, grid, responsive tasarım","JavaScript temelleri","DOM ve olaylar","fetch ile API'den veri çekmek","Tailwind CSS"],"Kişisel tanıtım sayfası, yapılacaklar listesi ve hava durumu uygulaması yap."],
+["Modern frontend",["ES6+ ve async/await","React: bileşen, state, props","Router ile çok sayfalı uygulama","Form yönetimi","TypeScript'e giriş"],"React ile film arama uygulaması ve not defteri yap."],
+"Bölüm 3 · Backend ve tam site",
+["Backend temelleri",["HTTP metotları ve REST API","Python ile FastAPI (ya da Node.js ile Express)","Routing, JSON, doğrulama","Hata yönetimi","Kimlik doğrulama (giriş, JWT)"],"Kendi REST API'ni yaz: kullanıcı girişi ve CRUD işlemleri olsun."],
+["Veritabanları",["SQL: SELECT, JOIN, GROUP BY","Tablo ilişkileri","SQLite ve PostgreSQL","ORM kullanımı","Veritabanı tasarımı"],"Kullanıcılı bir blog API'si ve veritabanı şeması tasarla."],
+["Tam yığın proje ve yayınlama",["Frontend ile backend'i birleştirmek","Ortam değişkenleri ve güvenlik temelleri","Linux ve Docker temelleri","Siteyi canlıya almak (Vercel, Render)"],"Giriş sistemli bir görev yönetim sitesi yap ve internette yayınla."],
+"Bölüm 4 · Yapay zekâ",
+["Yapay zekâ için matematik",["Vektör ve matris (lineer cebir)","Olasılık ve istatistik","Türev ve gradyan","Gradient descent"],"NumPy ile sıfırdan doğrusal regresyon yaz."],
+["Veri ile çalışmak",["NumPy","pandas","matplotlib ile görselleştirme","Veri temizleme","Keşifsel veri analizi"],"Kaggle'dan bir veri seti seçip analiz et ve grafiklerle özetle."],
+["Makine öğrenmesi",["Regresyon ve sınıflandırma","Karar ağaçları","Eğitim/test ayrımı, overfitting","Başarı metrikleri","scikit-learn"],"Ev fiyatı tahmini yapan bir model eğit ve modelleri karşılaştır."],
+["Derin öğrenme",["Sinir ağları ve backpropagation","PyTorch","CNN (görüntü)","Transformer ve attention"],"El yazısı rakam tanıyan bir model ve küçük bir dil modeli eğit."],
+["LLM ve yapay zekâlı uygulamalar",["LLM API'leri ve prompt yazımı","Embedding ve vektör veritabanı","RAG","Ajanlar ve araç kullanımı","Hugging Face"],"Bölüm 3'teki sitene dokümanlarla konuşan bir yapay zekâ sohbeti ekle."]
+];
+const R=[["roadmap.sh","Web ve yapay zekâ için interaktif yol haritası çizelgeleri. Bu site senin için mükemmel. Buna gir oradan kendi yolunu çiz, bu site benim sana söylediklerimden daha değerli.","https://roadmap.sh"],
+["CS50x","Harvard'ın bilgisayar bilimine giriş dersi, sıfırdan başlar. Buraya da gir izle, uygula, yap. Paralı sertifikası var istersen alabilirsin ama sana kalmış. Çok çok büyük bir artısı yok. Yani bir işe alınman için kilit nokta değil kesinlikle. Ama ders ücretsiz ve kesinlikle gir çalış.","https://cs50.harvard.edu/x"],
+["CS50P","Python ile programlamaya giriş. Buraya da bak.","https://cs50.harvard.edu/python"],
+["freeCodeCamp","HTML, CSS, JavaScript ve backend için uygulamalı dersler. Burası da yine dersler veren bir site. Bilindik bir ders.","https://www.freecodecamp.org"],
+["W3Schools","HTML, CSS, JavaScript ve SQL için temel dersler. Burayı ben 5-7 yıldır kullanıyorum. Özellikle yapay zeka yokken çok işe yarıyordu. Böyle temel unsurları öğrenmek için güzel bir site. Kullanabilirsin.","https://www.w3schools.com"],
+["The Odin Project","Tam yığın web geliştirme müfredatı","https://www.theodinproject.com"],
+["MDN Web Docs","HTML, CSS ve JavaScript için resmi başvuru kaynağı. Burayı kesinlikle kullan.","https://developer.mozilla.org"],
+["javascript.info","JavaScript'i baştan anlatan modern rehber. Javascript çok önemli.","https://javascript.info"],
+["React Docs","React'in resmi, uygulamalı eğitimi. React çok işe yarar bir kütüphane bunu kesinlikle öğren.","https://react.dev"],
+["FastAPI Docs","Python ile backend yazmak için resmi eğitim","https://fastapi.tiangolo.com"],
+["SQLBolt","Tarayıcıda interaktif SQL dersleri","https://sqlbolt.com"],
+["Khan Academy","Lineer cebir, olasılık ve kalkülüs dersleri","https://www.khanacademy.org"],
+["Kaggle Learn","Python, pandas ve makine öğrenmesi mini dersleri","https://www.kaggle.com/learn"],
+["Andrew Ng · ML Specialization","Makine öğrenmesine giriş kursu","https://www.coursera.org/specializations/machine-learning-introduction"],
+["3Blue1Brown","Sinir ağlarının görsel anlatımı","https://www.3blue1brown.com/topics/neural-networks"],
+["Karpathy · Zero to Hero","Sıfırdan dil modeli yazma serisi","https://karpathy.ai/zero-to-hero.html"],
+["Hugging Face Learn","LLM ve yapay zekâ kursları","https://huggingface.co/learn"]];
+const tl=document.getElementById('tl');let n=0;
+S.forEach(s=>{
+ if(typeof s==='string'){tl.insertAdjacentHTML('beforeend',`<div class="part rv" data-pdf>${s}</div>`);return}
+ n++;
+ tl.insertAdjacentHTML('beforeend',`<div class="item rv" data-pdf><div class="dot">${n}</div><div class="card p-5 md:p-6"><h3 class="fd text-xl">${s[0]}</h3><div class="mt-3">${s[1].map(x=>`<span class="chip">${x}</span>`).join('')}</div><div class="do mt-2"><b>Yap:</b> ${s[2]}</div></div></div>`)
+});
+document.getElementById('res').innerHTML=R.map(r=>`<a class="res card p-4 rv" href="${r[2]}" target="_blank" rel="noopener"><h3 class="font-semibold">${r[0]}</h3><p class="text-sm mu mt-1">${r[1]}</p></a>`).join('');
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.1});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+const fill=document.getElementById('fill'),bar=document.getElementById('bar'),items=[...tl.querySelectorAll('.item')];
+function onScroll(){const h=document.documentElement;bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+ const r=tl.getBoundingClientRect(),f=Math.max(0,Math.min(r.height,innerHeight*.6-r.top));fill.style.height=f+'px';
+ items.forEach(it=>it.classList.toggle('act',it.offsetTop+30<f))}
+addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+const btn=document.getElementById('pdfBtn');
+async function buildPdf(){
+ const {jsPDF}=window.jspdf,pdf=new jsPDF({unit:'mm',format:'a4'});
+ const W=210,PH=297,M=14,CW=W-2*M;let y=M;
+ for(const el of document.querySelectorAll('#doc [data-pdf]')){
+  const c=await html2canvas(el,{scale:2,backgroundColor:'#ffffff',useCORS:true,scrollX:0,scrollY:0,windowWidth:900});
+  const h=c.height*CW/c.width;
+  if(y+h>PH-M&&y>M){pdf.addPage();y=M}
+  pdf.addImage(c.toDataURL('image/jpeg',.92),'JPEG',M,y,CW,h);y+=h+3;
+ }
+ return pdf.output('blob');
+}
+btn.onclick=async()=>{
+ const dl=await claude.use('downloads').catch(()=>null);
+ if(!dl){window.print();return}
+ const y0=scrollY;btn.disabled=true;btn.textContent='Hazırlanıyor...';
+ scrollTo(0,0);document.body.classList.add('pdf');
+ try{
+  await document.fonts.ready;await new Promise(r=>setTimeout(r,250));
+  const blob=await buildPdf();
+  document.body.classList.remove('pdf');scrollTo(0,y0);
+  await dl.save({filename:'Yol-Haritasi.pdf',data:blob});
+ }catch(e){console.error(e)}
+ document.body.classList.remove('pdf');scrollTo(0,y0);
+ btn.disabled=false;btn.innerHTML='PDF olarak indir &darr;';
+};
+</script>
+</body>
+</html>
